@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do List</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    h1 {
+        text-align: center;
+    }
+    input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+    button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    li {
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    li:last-child {
+        border-bottom: none;
+    }
+    .delete-btn {
+        background-color: #dc3545;
+    }
+    .completed {
+        text-decoration: line-through;
+        opacity: 0.5;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>To-Do List</h1>
+    <input type="text" id="taskInput" placeholder="Enter your task...">
+    <button onclick="addTask()">Add Task</button>
+    <ul id="taskList"></ul>
+    <div>
+        <button onclick="filterTasks('all')">All</button>
+        <button onclick="filterTasks('active')">Active</button>
+        <button onclick="filterTasks('completed')">Completed</button>
+        <button onclick="clearCompleted()">Clear Completed</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadTasks();
+});
+
+function loadTasks() {
+    var tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    var taskList = document.getElementById('taskList');
+    taskList.innerHTML = '';
+
+    tasks.forEach(function(task, index) {
+        var li = document.createElement('li');
+        li.innerHTML = '<span class="task-text">' + task.text + '</span>' +
+                       '<button class="delete-btn" onclick="removeTask(' + index + ')">Delete</button>';
+        if (task.completed) {
+            li.classList.add('completed');
+        }
+        taskList.appendChild(li);
+    });
+}
+
+function saveTasks(tasks) {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function addTask() {
+    var taskInput = document.getElementById('taskInput');
+    var taskText = taskInput.value.trim();
+
+    if (taskText !== '') {
+        var tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        tasks.push({ text: taskText, completed: false });
+        saveTasks(tasks);
+        loadTasks();
+        taskInput.value = '';
+    } else {
+        alert('Please enter a task!');
+    }
+}
+
+function removeTask(index) {
+    var tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    tasks.splice(index, 1);
+    saveTasks(tasks);
+    loadTasks();
+}
+
+function filterTasks(filter) {
+    var tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    var filteredTasks = [];
+
+    switch (filter) {
+        case 'active':
+            filteredTasks = tasks.filter(function(task) {
+                return !task.completed;
+            });
+            break;
+        case 'completed':
+            filteredTasks = tasks.filter(function(task) {
+                return task.completed;
+            });
+            break;
+        default:
+            filteredTasks = tasks;
+            break;
+    }
+
+    var taskList = document.getElementById('taskList');
+    taskList.innerHTML = '';
+
+    filteredTasks.forEach(function(task, index) {
+        var li = document.createElement('li');
+        li.innerHTML = '<span class="task-text">' + task.text + '</span>' +
+                       '<button class="delete-btn" onclick="removeTask(' + index + ')">Delete</button>';
+        if (task.completed) {
+            li.classList.add('completed');
+        }
+        taskList.appendChild(li);
+    });
+}
+
+function clearCompleted() {
+    var tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    tasks = tasks.filter(function(task) {
+        return !task.completed;
+    });
+    saveTasks(tasks);
+    loadTasks();
+}
+</script>
+</body>
+</html>
